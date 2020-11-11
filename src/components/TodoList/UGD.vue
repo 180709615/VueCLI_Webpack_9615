@@ -1,3 +1,4 @@
+
 <template>
     <v-main class="list">
         <h3 class="text-h3 font-weight-medium mb-5">To Do List</h3>
@@ -16,7 +17,45 @@
                     Tambah
                 </v-btn>
             </v-card-title>
-            <v-data-table :headers="headers" :items="todos" :search="search">
+
+
+            <!-- <v-simple-table>
+                <template v-slot:default>
+                <thead>
+                    <tr>
+                    <th class="text-left">
+                        Task
+                    </th>
+                    <th class="text-left">
+                        Priority
+                    </th>
+                    <th class="text-left">
+                        Action
+                    </th>
+                    <th class="text-left">
+                        
+                    </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr
+                    v-for="item in todos"
+                    :key="item.task"
+                    >
+                    <td>{{ item.task }}</td>
+                    <td>{{ item.priority }}</td>
+                    </tr>
+                </tbody>
+                </template>
+            </v-simple-table> -->
+            <v-data-table 
+            :headers="headers" 
+            :items="todos" 
+            :search="search" 
+            :expanded.sync="expanded" 
+            item-key="note" 
+            show-expand 
+            class="elevation-1">
                 <template v-slot:[`item.actions`]="{ item }">
                     <v-btn small class="mr-2" @click="editItem(item)">
                         edit
@@ -25,6 +64,26 @@
                         delete
                     </v-btn>
                 </template>
+                <template v-slot:expanded-items="{ headers,items }">
+                    <td :colspan="headers.length">
+                        {{ items.note }}
+                    </td>
+                </template>
+                <template v-slot:[`item.priority`]="{ item }">
+                    <td>
+                            <v-chip v-if="item.priority == 'Penting'" color="red" outlined>
+                                {{ item.priority }}
+                            </v-chip>
+                            <v-chip v-else-if="item.priority == 'Biasa'" color="success" outlined>
+                                {{ item.priority }}
+                            </v-chip>
+                            <v-chip v-else color="primary" outlined>
+                                {{ item.priority }}
+                            </v-chip>
+                    </td>
+                    
+                </template>
+                
             </v-data-table>
         </v-card>
 
@@ -64,6 +123,19 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
+
+         <v-dialog v-model="dialogDelete" max-width="500px">
+          <v-card>
+            <v-card-title class="headline">Delete Item ini?</v-card-title>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue darken-1" text @click="dialogDelete = false">Cancel</v-btn>
+              <v-btn color="red darken-1" text @click="deleteItemConfirm">OK</v-btn>
+              <v-spacer></v-spacer>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+        
     </v-main>
 </template>
 <script>
@@ -73,6 +145,10 @@ export default {
         return {
             search: null,
             dialog: false,
+            dialogDelete : false,
+            editedIndex: -1,
+            expanded: [],
+            singleExpand: false,
             headers: [
                 {
                     text: "Task",
@@ -83,6 +159,7 @@ export default {
                 { text: "Priority", value: "priority" },
                 { text: "Note", value: "note" },
                 { text: "Actions", value: "actions" },
+                { text: 'Expand', value: 'data-table-expand' },
             ],
             todos: [
                 {
@@ -101,6 +178,7 @@ export default {
                     note: "masak air 500ml",
                 },
             ],
+            
             formTodo: {
                 task: null,
                 priority: null,
@@ -110,7 +188,12 @@ export default {
     },
     methods: {
         save() {
-            this.todos.push(this.formTodo);
+            if (this.editedIndex > -1) {
+                Object.assign(this.todos[this.editedIndex], this.formTodo)
+            } else {
+                this.todos.push(this.formTodo)
+            }
+            //this.todos.push(this.formTodo);
             this.resetForm();
             this.dialog = false;
         },
@@ -124,6 +207,22 @@ export default {
                 priority: null,
                 note: null,
             };
+        },
+        editItem (item) {
+            this.editedIndex = this.todos.indexOf(item)
+            this.formTodo = Object.assign({}, item)
+            this.dialog = true
+        },
+
+      deleteItem (item) {
+            this.editedIndex = this.todos.indexOf(item)
+            this.formTodo = Object.assign({}, item)
+            this.dialogDelete = true
+        },
+
+      deleteItemConfirm () {
+            this.todos.splice(this.editedIndex, 1)
+            this.dialogDelete = false;
         },
     },
 };
