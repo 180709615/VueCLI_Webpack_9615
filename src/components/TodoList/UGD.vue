@@ -39,6 +39,7 @@
             show-expand 
             show-select
             :data="todos"
+            v-model="selected"
             default-sort="priority"
             
             
@@ -51,6 +52,8 @@
                         mdi-delete
                     </v-icon>
                 </template>
+
+                <template v-slot:item.check="{ item }" @click="cekItem(item)"> </template>
 
                 
                 <template v-slot:expanded-item="{ headers,item }" >
@@ -96,18 +99,19 @@
             </v-data-table>
         </v-card>
 
-        <v-card class="elevation-1 mt-3">
+        <!-- <v-card class="elevation-1 mt-3">
             <v-card-title>
                 <h4> Checklist </h4>
             </v-card-title>
             <v-card-text>
-                <!-- <div v-for="selected in selected" key="selected">
-                    aa
-                </div> -->
+                
+                <ul>
+                    <li></li>
+                </ul>
                 {{ selected }}
                 
             </v-card-text>
-        </v-card>
+        </v-card> -->
 
 
         <v-dialog v-model="dialog" persistent max-width="600px">
@@ -186,7 +190,7 @@ export default {
                 { text: "Priority", value: "priority" },
                 //{ text: "Note", value: "note" },
                 { text: "Actions", value: "actions" },
-                { text: "", value:"data-table-select"},
+                { text: "Check", value:"data-table-select"},
                 
             ],
             todos: [
@@ -219,19 +223,7 @@ export default {
             },
         };
     },
-    // computed: {
-    //         sortedArray: function() {
-    //             function compare(a, b) {
-    //             if (a.idP < b.idP)
-    //                 return -1;
-    //             if (a.idP > b.idP)
-    //                 return 1;
-    //             return 0;
-    //             }
-
-    //             return this.todos.sort(compare);
-    //         }
-    //     },
+    
     methods: {
 
         sortBy(item){
@@ -240,14 +232,6 @@ export default {
             else
                 this.todos.sort((a,b) => a.idP > b.idP ? -1 : 1)
         },
-        // sortAsc(){
-        //     this.todos.sort((a,b) => a.idP < b.idP ? -1 : 1)
-        // },
-
-        // sortDesc(){
-        //     this.todos.sort((a,b) => a.idP > b.idP ? -1 : 1)
-        // },
-
         
         save() {
 
@@ -308,6 +292,11 @@ export default {
                 note: null,
             };
         },
+        // cekItem(item){
+        //     var index = this.todos.indexOf(item);
+
+        //     console.log(this.todos[index].task)
+        // }
     },
 };
 </script>
