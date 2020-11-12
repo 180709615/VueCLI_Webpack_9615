@@ -13,41 +13,23 @@
                     hide-details
                 ></v-text-field>
                 <v-spacer></v-spacer>
+
+                <v-select
+                    v-model ="selectedPriority"
+                    :items="['Penting', 'Tidak penting']"
+                    @input="sortBy(selectedPriority)"    
+                ></v-select>
                 <v-btn color="success" dark @click="dialog = true">
                     Tambah
                 </v-btn>
+               
+
+        
+                
+
             </v-card-title>
 
 
-            <!-- <v-simple-table>
-                <template v-slot:default>
-                <thead>
-                    <tr>
-                    <th class="text-left">
-                        Task
-                    </th>
-                    <th class="text-left">
-                        Priority
-                    </th>
-                    <th class="text-left">
-                        Action
-                    </th>
-                    <th class="text-left">
-                        
-                    </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr
-                    v-for="item in todos"
-                    :key="item.task"
-                    >
-                    <td>{{ item.task }}</td>
-                    <td>{{ item.priority }}</td>
-                    </tr>
-                </tbody>
-                </template>
-            </v-simple-table> -->
             <v-data-table 
             :headers="headers" 
             :items="todos" 
@@ -55,20 +37,34 @@
             :expanded.sync="expanded" 
             item-key="note" 
             show-expand 
+            show-select
+            :data="todos"
+            default-sort="priority"
+            
+            
             class="elevation-1">
                 <template v-slot:[`item.actions`]="{ item }">
-                    <v-btn small class="mr-2" @click="editItem(item)">
-                        edit
-                    </v-btn>
-                    <v-btn small @click="deleteItem(item)">
-                        delete
-                    </v-btn>
+                    <v-icon color="success" small class="mr-2"  @click="editItem(item)">
+                        mdi-pencil
+                    </v-icon>
+                    <v-icon color="red" small @click="deleteItem(item)">
+                        mdi-delete
+                    </v-icon>
                 </template>
-                <template v-slot:expanded-items="{ headers,items }">
-                    <td :colspan="headers.length">
-                        {{ items.note }}
+
+                
+                <template v-slot:expanded-item="{ headers,item }" >
+                    <td :colspan="headers.length" class="mr-2">
+                        <v-row :align="start">
+                            <h2>Note :</h2>
+                        </v-row>
+                        <v-row :align="start">  
+                            {{ item.note }}
+                        </v-row>
+                     
                     </td>
                 </template>
+
                 <template v-slot:[`item.priority`]="{ item }">
                     <td>
                             <v-chip v-if="item.priority == 'Penting'" color="red" outlined>
@@ -83,9 +79,36 @@
                     </td>
                     
                 </template>
+
+                <!-- <template  v-slot:header.data-table-select="{ on,props }">
+                   <v-simple-checkbox
+                    color="purple"
+                    v-bind="props"
+                    v-on="on"
+                    ></v-simple-checkbox
+                    
+                </template> -->
+                
+                
+
+            
                 
             </v-data-table>
         </v-card>
+
+        <v-card class="elevation-1 mt-3">
+            <v-card-title>
+                <h4> Checklist </h4>
+            </v-card-title>
+            <v-card-text>
+                <!-- <div v-for="selected in selected" key="selected">
+                    aa
+                </div> -->
+                {{ selected }}
+                
+            </v-card-text>
+        </v-card>
+
 
         <v-dialog v-model="dialog" persistent max-width="600px">
             <v-card>
@@ -105,11 +128,13 @@
                             label="Priority"
                             required
                         ></v-select>
-                        <v-textarea
+
+                        <v-text-field
                             v-model="formTodo.note"
                             label="Note"
                             required
-                        ></v-textarea>
+                        ></v-text-field>
+                    
                     </v-container>
                 </v-card-text>
                 <v-card-actions>
@@ -146,7 +171,9 @@ export default {
             search: null,
             dialog: false,
             dialogDelete : false,
+            selected:[],
             editedIndex: -1,
+            selectedPriority:"",
             expanded: [],
             singleExpand: false,
             headers: [
@@ -157,24 +184,29 @@ export default {
                     value: "task",
                 },
                 { text: "Priority", value: "priority" },
-                { text: "Note", value: "note" },
+                //{ text: "Note", value: "note" },
                 { text: "Actions", value: "actions" },
-                { text: 'Expand', value: 'data-table-expand' },
+                { text: "", value:"data-table-select"},
+                
             ],
             todos: [
                 {
                     task: "bernafas",
                     priority: "Penting",
+                    idP:1,
                     note: "huffttt",
                 },
                 {
+                    
                     task: "nongkrong",
                     priority: "Tidak penting",
+                    idP:3,
                     note: "bersama tman2",
                 },
                 {
                     task: "masak",
                     priority: "Biasa",
+                    idP:2,
                     note: "masak air 500ml",
                 },
             ],
@@ -182,17 +214,62 @@ export default {
             formTodo: {
                 task: null,
                 priority: null,
+                idP: null,
                 note: null,
             },
         };
     },
+    // computed: {
+    //         sortedArray: function() {
+    //             function compare(a, b) {
+    //             if (a.idP < b.idP)
+    //                 return -1;
+    //             if (a.idP > b.idP)
+    //                 return 1;
+    //             return 0;
+    //             }
+
+    //             return this.todos.sort(compare);
+    //         }
+    //     },
     methods: {
+
+        sortBy(item){
+            if(item == "Penting")
+                this.todos.sort((a,b) => a.idP < b.idP ? -1 : 1)
+            else
+                this.todos.sort((a,b) => a.idP > b.idP ? -1 : 1)
+        },
+        // sortAsc(){
+        //     this.todos.sort((a,b) => a.idP < b.idP ? -1 : 1)
+        // },
+
+        // sortDesc(){
+        //     this.todos.sort((a,b) => a.idP > b.idP ? -1 : 1)
+        // },
+
+        
         save() {
+
+            if(this.formTodo.priority == "Penting"){
+                this.formTodo.idP =1;
+            }else if(this.formTodo.priority == "Biasa"){
+                this.formTodo.idP =2;
+            }else if(this.formTodo.priority == "Tidak penting"){
+                this.formTodo.idP =3;
+            }
+            console.log(this.formTodo.note)
+            console.log(this.formTodo.priority)
+            console.log(this.formTodo.idP)
+
             if (this.editedIndex > -1) {
                 Object.assign(this.todos[this.editedIndex], this.formTodo)
+                this.editedIndex = -1;
             } else {
                 this.todos.push(this.formTodo)
+                
             }
+            this.editedIndex = -1;
             //this.todos.push(this.formTodo);
             this.resetForm();
             this.dialog = false;
@@ -218,11 +295,18 @@ export default {
             this.editedIndex = this.todos.indexOf(item)
             this.formTodo = Object.assign({}, item)
             this.dialogDelete = true
+            
         },
 
       deleteItemConfirm () {
             this.todos.splice(this.editedIndex, 1)
             this.dialogDelete = false;
+            this.editedIndex = -1
+            this.formTodo = {
+                task: null,
+                priority: null,
+                note: null,
+            };
         },
     },
 };
