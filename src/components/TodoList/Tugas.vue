@@ -92,7 +92,7 @@
             <v-card-text>
                 <div v-show="selected">
                     <ul>
-                        <li align="start" v-for="(todo,index) in selected" key="index">{{ todo.task }}</li>
+                        <li align="start" v-for="(todo,index) in selected" :key="index">{{ todo.task }}</li>
                     </ul>
                     <v-btn color="red" dark @click="deleteSemua()">
                         Delete Semua
@@ -286,18 +286,20 @@ export default {
             };
         },
         deleteSemua(){
-            console.log("aaaaaaaaa")
+            
             var i=0
             var length=this.selected.length
             console.log(length)
             for(i = 0;i<length;i++)
             { 
-                var item = this.selected[i]
-                var index = this.todos.indexOf(item)
-                console.log(index)
-                this.todos.splice(this.index, 1)
+                
+                var index = this.todos.indexOf(this.selected[i])
+                
+                this.todos.splice(index, 1)
                 this.selected.splice(i,1);
+            
             }
+            this.selected = []
         },
     },
 };
