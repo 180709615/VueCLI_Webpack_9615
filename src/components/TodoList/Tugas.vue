@@ -85,7 +85,7 @@
             </v-data-table>
         </v-card>
 
-        <v-card class="elevation-1 mt-3">
+        <v-card v-if="selected.length > 0" class="elevation-1 mt-3">
             <v-card-title>
                 <h4> Checklist </h4>
             </v-card-title>
